@@ -1,3 +1,4 @@
 def test_welcome_message():
-    response = "Hola desde CI/CD 🚀"
+    response = "Adiós desde CI/CD 🚀"
     assert "Hola" in response
+
