@@ -1,5 +1,4 @@
 services:
-
   nginx-proxy-manager:
     image: jc21/nginx-proxy-manager:latest
     container_name: nginx-proxy-manager
@@ -26,7 +25,7 @@ services:
       - red-cba
 
   app_backend:
-    image: santy0811/docker-flask-backend:latest
+    build: .
     container_name: app-backend-ejemplo
     environment:
       FLASK_ENV: development
