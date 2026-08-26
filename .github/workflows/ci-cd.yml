@@ -2,30 +2,70 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-  test:
+  test-and-security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Descargar código
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-      - name: Install dependencies
+          python-version: '3.12'
+
+      - name: Instalar dependencias
         run: |
-          pip install -r requirements.txt || echo "No requirements.txt"
-      - name: Run tests
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest bandit
+
+      - name: Escaneo de seguridad (bandit)
+        run: bandit -r . -s B101
+
+      - name: Ejecutar pruebas pytest
         run: pytest
 
-  build-deploy:
-    needs: test
+  build-and-deploy:
+    needs: test-and-security
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Build Docker image
-        run: docker build -t flask_app .
-      - name: Deploy to server
-        run: |
-          ssh usuario@tu-servidor "docker pull flask_app && docker-compose up -d"
+      - name: Descargar código
+        uses: actions/checkout@v3
+
+      - name: Iniciar sesión en Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Construir y subir imagen
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: tuusuario/flask_app:latest
+
+      - name: Escanear contenedor con Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'tuusuario/flask_app:latest'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Desplegar en servidor cloud
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd ~/Flask_docker-s
+            docker compose pull app
+            docker compose up -d
+

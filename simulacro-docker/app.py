@@ -7,4 +7,14 @@ def home():
     return "Bienvenido a mi API con CI/CD 🚀"
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    import os
+
+    
+    docker_mode = os.environ.get("DOCKER_MODE", "false").lower() == "true"
+
+    if docker_mode:
+        
+        app.run(host="0.0.0.0", port=5000) # nosec
+    else:
+        
+        app.run(host="127.0.0.1", port=5000)
