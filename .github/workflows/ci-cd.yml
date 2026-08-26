@@ -28,7 +28,7 @@ jobs:
       - name: Ejecutar pruebas pytest
         run: pytest
 
-  build-and-deploy:   
+  build-and-deploy:
     needs: test-and-security
     runs-on: ubuntu-latest
     steps:
