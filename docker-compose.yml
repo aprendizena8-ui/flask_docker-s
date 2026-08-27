@@ -72,3 +72,4 @@ volumes:
   uptime-kuma-data:
     name: uptime-kuma-data
     
+    
