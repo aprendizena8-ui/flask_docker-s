@@ -5,16 +5,18 @@ on:
     branches: ["main"]
 
 jobs:
+
   test-and-security:
     runs-on: ubuntu-latest
+
     steps:
       - name: Descargar código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configurar Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Instalar dependencias
         run: |
@@ -22,41 +24,44 @@ jobs:
           pip install -r requirements.txt
           pip install pytest bandit
 
-      - name: Escaneo de seguridad (bandit)
-        run: bandit -r . -s B101
+      - name: Escaneo de seguridad con Bandit
+        run: |
+          bandit -r . -s B101
 
-      - name: Ejecutar pruebas pytest
-        run: pytest
+      - name: Ejecutar pruebas con Pytest
+        run: |
+          pytest
 
   build-and-deploy:
     needs: test-and-security
     runs-on: ubuntu-latest
+
     steps:
       - name: Descargar código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Iniciar sesión en Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v4
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: santy0811
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Construir y subir imagen
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/flask_app:latest
+          tags: santy0811/flask_app:latest
 
       - name: Escanear contenedor con Trivy
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: '${{ secrets.DOCKER_USERNAME }}/flask_app:latest'
-          format: 'table'
-          exit-code: '1'
+          image-ref: "santy0811/flask_app:latest"
+          format: "table"
+          exit-code: "1"
           ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL'
+          vuln-type: "os,library"
+          severity: "HIGH,CRITICAL"
 
       - name: Desplegar en servidor cloud
         uses: appleboy/ssh-action@v1.0.3
@@ -65,7 +70,29 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd ~/Flask_docker-s
-            docker compose pull app
-            docker compose up -d
+            echo "Conectado al servidor"
+            whoami
+            pwd
 
+            COMPOSE_FILE=$(find ~ -name "docker-compose.yml" -type f -print -quit)
+
+            if [ -z "$COMPOSE_FILE" ]; then
+              echo "ERROR: No se encontró docker-compose.yml"
+              exit 1
+            fi
+
+            echo "docker-compose.yml encontrado en:"
+            echo "$COMPOSE_FILE"
+
+            cd "$(dirname "$COMPOSE_FILE")"
+
+            echo "Actualizando imagen"
+            docker compose pull app_backend
+
+            echo "Actualizando contenedor"
+            docker compose up -d app_backend
+
+            echo "Estado del contenedor"
+            docker compose ps
+
+            echo "Despliegue terminado"

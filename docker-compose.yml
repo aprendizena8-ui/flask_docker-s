@@ -1,5 +1,4 @@
 services:
-
   nginx-proxy-manager:
     image: jc21/nginx-proxy-manager:latest
     container_name: nginx-proxy-manager
@@ -14,7 +13,6 @@ services:
     networks:
       - red-cba
 
-
   servidor-bd:
     image: mysql:8.0
     container_name: servidor-bd
@@ -25,7 +23,6 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - red-cba
-
 
   app_backend:
     image: santy0811/flask_app:latest
@@ -43,7 +40,6 @@ services:
     networks:
       - red-cba
 
-
   uptime-kuma:
     image: louislam/uptime-kuma:1
     container_name: uptime-kuma
@@ -55,21 +51,15 @@ services:
     networks:
       - red-cba
 
-
 networks:
   red-cba:
-
 
 volumes:
   mysql-data:
     name: mysql-data
-
   npm-data:
     name: npm-data
-
   letsencrypt:
-
   uptime-kuma-data:
     name: uptime-kuma-data
-    
     
