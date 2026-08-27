@@ -20,9 +20,9 @@ jobs:
 
       - name: Instalar dependencias
         run: |
-          python -m pip install --upgrade pip setuptools wheel msgpack
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest bandit
+          pip install bandit
 
       - name: Escaneo de seguridad con Bandit
         run: bandit -r . -s B101
@@ -58,7 +58,7 @@ jobs:
         with:
           image-ref: "santy0811/flask_app:latest"
           format: "table"
-          exit-code: "0"        
+          exit-code: "0"       
           ignore-unfixed: true
           vuln-type: "os,library"
           severity: "CRITICAL,HIGH"
