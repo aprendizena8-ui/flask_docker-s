@@ -13,7 +13,8 @@ RUN pip install --upgrade pip \
     && rm -rf ~/.cache/pip
 
 COPY app.py .
-CMD ["python", "app.py"]
+EXPOSE 5055
+CMD ["python3", "app.py"]
 
 
 
