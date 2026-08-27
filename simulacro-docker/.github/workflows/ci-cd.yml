@@ -58,7 +58,7 @@ jobs:
         with:
           image-ref: "santy0811/flask_app:latest"
           format: "table"
-          exit-code: "0"
+          exit-code: "0"        
           ignore-unfixed: true
           vuln-type: "os,library"
           severity: "CRITICAL,HIGH"
@@ -74,6 +74,3 @@ jobs:
             docker compose pull app_backend
             docker compose up -d app_backend
             docker image prune -f
-
-
-
