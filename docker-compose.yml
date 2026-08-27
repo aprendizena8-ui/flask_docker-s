@@ -1,0 +1,73 @@
+services:
+
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: always
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+    volumes:
+      - npm-data:/data
+      - letsencrypt:/etc/letsencrypt
+    networks:
+      - red-cba
+
+
+  servidor-bd:
+    image: mysql:8.0
+    container_name: servidor-bd
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - red-cba
+
+
+  app_backend:
+    image: santy0811/flask_app:latest
+    container_name: app-backend-ejemplo
+    restart: always
+    environment:
+      DOCKER_MODE: "true"
+      FLASK_ENV: development
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    depends_on:
+      - servidor-bd
+    ports:
+      - "5050:5000"
+    networks:
+      - red-cba
+
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: always
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime-kuma-data:/app/data
+    networks:
+      - red-cba
+
+
+networks:
+  red-cba:
+
+
+volumes:
+  mysql-data:
+    name: mysql-data
+
+  npm-data:
+    name: npm-data
+
+  letsencrypt:
+
+  uptime-kuma-data:
+    name: uptime-kuma-data

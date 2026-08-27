@@ -25,12 +25,10 @@ jobs:
           pip install pytest bandit
 
       - name: Escaneo de seguridad con Bandit
-        run: |
-          bandit -r . -s B101
+        run: bandit -r . -s B101
 
       - name: Ejecutar pruebas con Pytest
-        run: |
-          pytest
+        run: pytest
 
 
   build-and-deploy:
@@ -38,7 +36,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Descargar código
         uses: actions/checkout@v4
 
@@ -51,7 +48,8 @@ jobs:
       - name: Construir y subir imagen Docker
         uses: docker/build-push-action@v7
         with:
-          context: .
+          context: ./simulacro-docker
+          file: ./simulacro-docker/Dockerfile
           push: true
           tags: santy0811/flask_app:latest
 
@@ -71,13 +69,10 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-
           script: |
             cd ~/Flask_docker-s
-
             docker compose pull app_backend
-
             docker compose up -d app_backend
-
             docker image prune -f
+
 
