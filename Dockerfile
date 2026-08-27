@@ -9,11 +9,12 @@ COPY requirements.txt .
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt \
     && pip uninstall -y setuptools wheel \
-    && pip install setuptools==78.1.1 wheel==0.48.0 \
+    && pip install setuptools==78.1.1 wheel==0.46.2 \
     && rm -rf ~/.cache/pip
 
 COPY app.py .
 CMD ["python", "app.py"]
+
 
 
 
