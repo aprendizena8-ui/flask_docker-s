@@ -12,6 +12,18 @@ services:
       - letsencrypt:/etc/letsencrypt
     networks:
       - red-cba
+    
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8080:8080"
+    networks:
+      - red-cba
+
 
   servidor-bd:
     image: mysql:8.0
@@ -23,6 +35,8 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - red-cba
+
+  
 
   app_backend:
     image: santy0811/flask_app:latest
