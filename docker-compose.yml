@@ -1,79 +1,74 @@
 services:
-  nginx-proxy-manager:
+  app_backend:
+    image: santy0811/flask_app:latest
+    environment:
+      FLASK_ENV: development
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    depends_on:
+      - servidor_bd
+    ports:
+      - "5050:5000"
+    networks:
+      - red_cba
+
+  servidor_bd:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - red_cba
+
+  nginx_proxy_manager:
     image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy-manager
     restart: always
     ports:
       - "80:80"
       - "81:81"
       - "443:443"
     volumes:
-      - npm-data:/data
+      - npm_data:/data
       - letsencrypt:/etc/letsencrypt
     networks:
-      - red-cba
-    
-  dozzle:
-    image: amir20/dozzle:latest
-    container_name: dozzle
-    restart: always
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "8080:8080"
-    networks:
-      - red-cba
+      - red_cba
 
-
-  servidor-bd:
-    image: mysql:8.0
-    container_name: servidor-bd
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-    volumes:
-      - mysql-data:/var/lib/mysql
-    networks:
-      - red-cba
-
-  
-
-  app_backend:
-    image: santy0811/flask_app:latest
-    container_name: app-backend-ejemplo
-    restart: always
-    environment:
-      DOCKER_MODE: "true"
-      FLASK_ENV: development
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-    depends_on:
-      - servidor-bd
-    ports:
-      - "5050:5000"
-    networks:
-      - red-cba
-
-  uptime-kuma:
+  uptime_kuma:
     image: louislam/uptime-kuma:1
-    container_name: uptime-kuma
     restart: always
     ports:
       - "3001:3001"
     volumes:
-      - uptime-kuma-data:/app/data
+      - uptime_kuma_data:/app/data
     networks:
-      - red-cba
+      - red_cba
+
+  dozzle:
+    image: amir20/dozzle:latest
+    restart: always
+    ports:
+      - "8090:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - red_cba
+
+  signal_cli_rest_api:
+    image: bbernhard/signal-cli-rest-api:latest
+    restart: always
+    ports:
+      - "8081:8080"
+    networks:
+      - red_cba
 
 networks:
-  red-cba:
+  red_cba:
 
 volumes:
-  mysql-data:
-    name: mysql-data
-  npm-data:
-    name: npm-data
+  mysql_data:
+  npm_data:
   letsencrypt:
-  uptime-kuma-data:
-    name: uptime-kuma-data
+  uptime_kuma_data:
     

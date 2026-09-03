@@ -1,5 +1,7 @@
-def test_welcome_message():
-    response = "Hola desde CI/CD 🚀"
-    assert "Hola" in response
+import requests
 
+def test_home_endpoint():
+    response = requests.get("http://localhost:5000/")
+    assert response.status_code == 200
+    assert "Bienvenido" in response.text
 
