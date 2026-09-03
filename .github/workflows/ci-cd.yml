@@ -3,6 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
 
@@ -25,12 +27,10 @@ jobs:
           pip install pytest bandit
 
       - name: Escaneo de seguridad con Bandit
-        run: |
-          bandit -r . -s B101
+        run: bandit -r . -s B101
 
       - name: Ejecutar pruebas con Pytest
-        run: |
-          pytest
+        run: pytest -v
 
   build-and-deploy:
     needs: test-and-security
