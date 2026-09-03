@@ -1,14 +1,21 @@
+version: "3.9"
+
 services:
   app_backend:
-    image: santy0811/flask_app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       FLASK_ENV: development
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
+      DOCKER_MODE: "true"
     depends_on:
-      - servidor_bd
+      servidor_bd:
+        condition: service_healthy   # espera a que MySQL esté listo
     ports:
       - "5050:5000"
+    restart: always                  # reinicia si se cae
     networks:
       - red_cba
 
@@ -21,14 +28,19 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - red_cba
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   nginx_proxy_manager:
     image: jc21/nginx-proxy-manager:latest
     restart: always
     ports:
-      - "80:80"
-      - "81:81"
-      - "443:443"
+      - "8085:80"
+      - "8086:81"
+      - "8443:443"
     volumes:
       - npm_data:/data
       - letsencrypt:/etc/letsencrypt
@@ -36,10 +48,10 @@ services:
       - red_cba
 
   uptime_kuma:
-    image: louislam/uptime-kuma:1
+    image: louislam/uptime-kuma:latest
     restart: always
     ports:
-      - "3001:3001"
+      - "3005:3001"
     volumes:
       - uptime_kuma_data:/app/data
     networks:
@@ -71,4 +83,3 @@ volumes:
   npm_data:
   letsencrypt:
   uptime_kuma_data:
-    
